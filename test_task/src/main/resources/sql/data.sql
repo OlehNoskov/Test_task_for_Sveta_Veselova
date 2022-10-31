@@ -1,0 +1,10 @@
+INSERT INTO persons values (1, 20, "Oleg", "Shevchenko");
+INSERT INTO persons values (2, 22, "Sergiy", "Kysil");
+INSERT INTO persons values (3, 30, "Olha", "Shevchenko");
+INSERT INTO persons values (4, 40, "Oksana", "Dolina");
+INSERT INTO persons values (5, 25, "Vladislav", "Rastvorcev");
+INSERT INTO persons values (6, 29, "Irina", "Rastvorceva");
+INSERT INTO persons values (7, 31, "Alex", "Shevchenko");
+INSERT INTO persons values (8, 19, "Andriy", "Gorbun");
+INSERT INTO persons values (9, 18, "Oleg", "Noskov");
+INSERT INTO persons values (10, 22, "Dmitriy", "Shelestov");

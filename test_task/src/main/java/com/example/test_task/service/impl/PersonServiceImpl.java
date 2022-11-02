@@ -6,6 +6,7 @@ import com.example.test_task.service.PersonService;
 
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Date;
@@ -20,13 +21,17 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public Person findById(Long id) {
-        Person person = personRepository.findById(id).get();
+        Person person = personRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("Person does not exist for id = %s!", id)));
         person.setAge(Period.between(convertToLocalDateViaSqlDate(person.getBirthDay()),
-                                     convertToLocalDateViaSqlDate(new Date(System.currentTimeMillis()))).getYears());
+                convertToLocalDateViaSqlDate(new Date(System.currentTimeMillis()))).getYears());
+
         return person;
     }
 
     private LocalDate convertToLocalDateViaSqlDate(Date dateToConvert) {
-        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+        if (dateToConvert != null) {
+            return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+        }
+        throw new NullPointerException("Birthday null!");
     }
 }

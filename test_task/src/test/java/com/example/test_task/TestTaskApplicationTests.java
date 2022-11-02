@@ -10,10 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -23,7 +30,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureMockMvc
 class TestTaskApplicationTests {
+
+    @Autowired
+    private MockMvc mvc;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -34,21 +45,23 @@ class TestTaskApplicationTests {
     @Autowired
     private PersonRepository personRepository;
 
+    private final long testUserId = 10;
+
     @Test
     public void whenFindByIdName_successfully() {
-        String name = personService.findById(10L).getFirst_name();
+        String name = personService.findById(testUserId).getFirst_name();
         Assertions.assertEquals("Dmitriy", name);
     }
 
     @Test
     public void wheFindByIdSurname_successfully() {
-        String surname = personService.findById(10L).getLast_name();
+        String surname = personService.findById(testUserId).getLast_name();
         Assertions.assertEquals("Shelestov", surname);
     }
 
     @Test
     public void testCalculateAge_successfully() {
-        Person person = personService.findById(10L);
+        Person person = personService.findById(testUserId);
         Assertions.assertEquals(21, person.getAge());
     }
 
@@ -75,7 +88,7 @@ class TestTaskApplicationTests {
     @Test
     public void givenPerson_whenGetPerson_thenStatus200() {
         long id = personService.findById(10L).getId();
-        HttpEntity<Person> entity = new HttpEntity<>(personService.findById(10L));
+        HttpEntity<Person> entity = new HttpEntity<>(personService.findById(testUserId));
         Person person = testRestTemplate.getForObject("/persons/search/{id}", Person.class, id);
         ResponseEntity<Person> response = testRestTemplate.exchange("/persons/search/{id}", HttpMethod.GET, entity, Person.class, id);
 
@@ -83,5 +96,13 @@ class TestTaskApplicationTests {
         assertThat(person.getFirst_name(), is("Dmitriy"));
         assertThat(person.getLast_name(), is("Shelestov"));
         assertThat(person.getAge(), is(21));
+    }
+
+    @Test
+    public void testControllerFindPersonById_thenStatus200() throws Exception {
+        ResultMatcher ok = MockMvcResultMatchers.status().is2xxSuccessful();
+
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/persons/search/" + testUserId);
+        this.mvc.perform(builder).andExpect(ok);
     }
 }
